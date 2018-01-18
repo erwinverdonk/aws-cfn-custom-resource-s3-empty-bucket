@@ -1,9 +1,8 @@
 const AWS = require('aws-sdk');
-const fs = require('fs');
-const cf = new AWS.CloudFormation();
-
 AWS.config.update({ region: 'eu-west-1' });
 
+const fs = require('fs');
+const cf = new AWS.CloudFormation();
 const cfTemplate = fs.readFileSync('cloudformation.yaml');
 const code = fs.readFileSync('handler.js');
 

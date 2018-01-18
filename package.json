@@ -1,0 +1,21 @@
+{
+  "name": "cloudformation-s3-empty-bucket",
+  "version": "1.0.0",
+  "description": "",
+  "scripts": {
+    "deploy": "node ./deploy.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/erwinverdonk/CloudFormationS3EmptyBucket.git"
+  },
+  "author": "Erwin Verdonk <e.verdonk@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/erwinverdonk/CloudFormationS3EmptyBucket/issues"
+  },
+  "homepage": "https://github.com/erwinverdonk/CloudFormationS3EmptyBucket#readme",
+  "devDependencies": {
+    "aws-sdk": "^2.184.0"
+  }
+}
