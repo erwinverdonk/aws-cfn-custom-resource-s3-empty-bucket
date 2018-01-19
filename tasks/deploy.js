@@ -4,10 +4,10 @@ AWS.config.update({ region: 'eu-west-1' });
 const fs = require('fs');
 const cf = new AWS.CloudFormation();
 const cfTemplate = fs.readFileSync('cloudformation.yaml');
-const code = fs.readFileSync('handler.js');
+const code = fs.readFileSync('./src/index.js');
 
 cf.createStack({
-  StackName: 'CloudFormationS3EmptyBucketFunction',
+  StackName: 'CFNCustomResource-S3EmptyBucket',
   TemplateBody: cfTemplate.toString(),
   Capabilities: ['CAPABILITY_IAM'],
   Parameters: [
@@ -21,7 +21,7 @@ cf.createStack({
 .catch(_ => {
   if (_.code === 'AlreadyExistsException') {
     cf.updateStack({
-      StackName: 'CloudFormationS3EmptyBucketFunction',
+      StackName: 'CFNCustomResource-S3EmptyBucket',
       TemplateBody: cfTemplate.toString(),
       Capabilities: ['CAPABILITY_IAM'],
       Parameters: [

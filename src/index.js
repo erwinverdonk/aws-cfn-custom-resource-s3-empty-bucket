@@ -6,26 +6,26 @@ exports.handler = (event, context, callback) => {
   const S3 = new AWS.S3();
 
   console.log('S3EmptyBucket: Data: ', event);
-  console.log('S3EmptyBucket: Booting...');
+
+  const retrieveBucket = () => {
+    return S3.listBuckets()
+      .promise()
+      .then(_ => {
+        if(!_.Buckets.some(_ => _.Name === props.BucketName)){
+          throw new Error('Provided S3 Bucket does not exist');
+        }
+      })
+  };
 
   const empty = (keyMarker, versionIdMarker) => {
-    console.log('S3EmptyBucket: Verify existence S3 Bucket...')
-    return S3.listBuckets()
-    .promise()
-    .then(_ => {
-      if(!_.Buckets.some(_ => _.Name === props.BucketName)){
-        throw new Error('Provided S3 Bucket does not exist');
-      }
-    })
-    .then(_ => {
-      console.log('S3EmptyBucket: Start emptying S3 Bucket...');
+    console.log('S3EmptyBucket: Start emptying S3 Bucket...');
 
-      return S3.listObjectVersions({
-        Bucket: props.BucketName,
-        KeyMarker: keyMarker,
-        VersionIdMarker: versionIdMarker,
-      }).promise()
+    return S3.listObjectVersions({
+      Bucket: props.BucketName,
+      KeyMarker: keyMarker,
+      VersionIdMarker: versionIdMarker,
     })
+    .promise()
     .then(listObjectsResult => {
       if (listObjectsResult.DeleteMarkers.length === 0 && listObjectsResult.Versions.length === 0) return;
 
@@ -58,7 +58,7 @@ exports.handler = (event, context, callback) => {
     const parsedUrl = URL.parse(event.ResponseURL);
     const responseBody = JSON.stringify({
       Status: responseStatus,
-      Reason: 'See the details in CloudWatch Log Stream: ' + context.logStreamName,
+      Reason: `See the details in CloudWatch Log Stream: ${context.logStreamName}`,
       PhysicalResourceId: context.logStreamName,
       StackId: event.StackId,
       RequestId: event.RequestId,
@@ -82,22 +82,29 @@ exports.handler = (event, context, callback) => {
     request.end();
   };
 
-  console.log('S3EmptyBucket: Making decision about request type:', event.RequestType);
-
   switch (event.RequestType) {
     case 'Delete':
-      empty()
+      retrieveBucket()
+        .then(_ => empty()
+          .then(_ => {
+            console.log('S3EmptyBucket: S3 bucket is successfully emptied.');
+            return sendResponse(event, context, 'SUCCESS', _);
+          })
+          .catch(_ => {
+            console.log('S3EmptyBucket: An error occured while emptying the S3 bucket.', _);
+            return sendResponse(event, context, 'FAILED', _);
+          })
+        )
+      break;
+    default:
+      retrieveBucket()
         .then(_ => {
-          console.log('S3EmptyBucket: S3 bucket is successfully emptied.');
+          console.log('S3EmptyBucket: S3 bucket is successfully verified.');
           return sendResponse(event, context, 'SUCCESS', _);
         })
         .catch(_ => {
-          console.log('S3EmptyBucket: An error occured while emptying the S3 bucket.', _);
+          console.log('S3EmptyBucket: An error occured while verifying the S3 bucket.', _);
           return sendResponse(event, context, 'FAILED', _);
         });
-      break;
-    default:
-      console.log('S3EmptyBucket: No actions to perform for current request type.');
-      return sendResponse(event, context, 'SUCCESS');
   }
 };

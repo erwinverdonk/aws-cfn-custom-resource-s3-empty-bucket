@@ -1,20 +1,20 @@
 {
-  "name": "cloudformation-s3-empty-bucket",
+  "name": "aws-cfn-custom-resource-s3-empty-bucket",
   "version": "1.0.0",
   "description": "",
   "scripts": {
-    "deploy": "node ./deploy.js"
+    "deploy": "node ./tasks/deploy.js"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/erwinverdonk/CloudFormationS3EmptyBucket.git"
+    "url": "git+https://github.com/erwinverdonk/aws-cfn-custom-resource-s3-empty-bucket.git"
   },
   "author": "Erwin Verdonk <e.verdonk@gmail.com>",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/erwinverdonk/CloudFormationS3EmptyBucket/issues"
+    "url": "https://github.com/erwinverdonk/aws-cfn-custom-resource-s3-empty-bucket/issues"
   },
-  "homepage": "https://github.com/erwinverdonk/CloudFormationS3EmptyBucket#readme",
+  "homepage": "https://github.com/erwinverdonk/aws-cfn-custom-resource-s3-empty-bucket#readme",
   "devDependencies": {
     "aws-sdk": "^2.184.0"
   }

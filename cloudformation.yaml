@@ -19,7 +19,7 @@ Resources:
           - sts:AssumeRole
       Path: "/"
       Policies:
-      - PolicyName: "CloudFormationS3EmptyBucketPolicy"
+      - PolicyName: "CFNCustomResourcePolicy-S3EmptyBucket"
         PolicyDocument:
           Version: "2012-10-17"
           Statement:
@@ -51,7 +51,7 @@ Resources:
       Role: !GetAtt LambdaExecutionRole.Arn
 
 Outputs:
-  S3EmptyBucketFunction:
-    Value: !GetAtt S3EmptyBucketFunction.Arn
+  S3EmptyBucketFunctionArn:
     Export:
-      Name: "S3EmptyBucketFunction"
+      Name: "S3EmptyBucketFunctionArn"
+    Value: !GetAtt S3EmptyBucketFunction.Arn
