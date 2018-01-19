@@ -25,6 +25,12 @@ Resources:
           Statement:
           - Effect: Allow
             Action:
+              - logs:CreateLogGroup
+              - logs:CreateLogStream
+              - logs:PutLogEvents
+            Resource: arn:aws:logs:*:*:*
+          - Effect: Allow
+            Action:
             - s3:DeleteObject
             - s3:DeleteObjectVersion
             - s3:ListBucket
@@ -44,6 +50,6 @@ Resources:
 
 Outputs:
   S3EmptyBucketFunction:
-    Value: !Ref S3EmptyBucketFunction
+    Value: !GetAtt S3EmptyBucketFunction.Arn
     Export:
       Name: "S3EmptyBucketFunction"
