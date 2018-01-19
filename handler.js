@@ -9,12 +9,23 @@ exports.handler = (event, context, callback) => {
   console.log('S3EmptyBucket: Booting...');
 
   const empty = (keyMarker, versionIdMarker) => {
-    return S3.listObjectVersions({
-      Bucket: props.BucketName,
-      KeyMarker: keyMarker,
-      VersionIdMarker: versionIdMarker,
-    })
+    console.log('S3EmptyBucket: Verify existence S3 Bucket...')
+    return S3.listBuckets()
     .promise()
+    .then(_ => {
+      if(!_.Buckets.some(_ => _.Name === props.BucketName)){
+        throw new Error('Provided S3 Bucket does not exist');
+      }
+    })
+    .then(_ => {
+      console.log('S3EmptyBucket: Start emptying S3 Bucket...');
+
+      return S3.listObjectVersions({
+        Bucket: props.BucketName,
+        KeyMarker: keyMarker,
+        VersionIdMarker: versionIdMarker,
+      }).promise()
+    })
     .then(listObjectsResult => {
       if (listObjectsResult.DeleteMarkers.length === 0 && listObjectsResult.Versions.length === 0) return;
 
@@ -65,7 +76,7 @@ exports.handler = (event, context, callback) => {
       }
     };
 
-    const request = HTTPS.request(options, _ => callback(_));
+    const request = HTTPS.request(options, _ => _.on('data', _ => callback(_)));
     request.on('error', _ => callback(_));
     request.write(responseBody);
     request.end();
@@ -75,15 +86,13 @@ exports.handler = (event, context, callback) => {
 
   switch (event.RequestType) {
     case 'Delete':
-      console.log('S3EmptyBucket: Start emptying S3 Bucket...');
-
       empty()
         .then(_ => {
           console.log('S3EmptyBucket: S3 bucket is successfully emptied.');
           return sendResponse(event, context, 'SUCCESS', _);
         })
         .catch(_ => {
-          console.log('S3EmptyBucket: An error occured while emptying the S3 bucket.');
+          console.log('S3EmptyBucket: An error occured while emptying the S3 bucket.', _);
           return sendResponse(event, context, 'FAILED', _);
         });
       break;
