@@ -4,7 +4,7 @@ exports.default = (() => {
 
   const fs = require('fs');
   const cf = new AWS.CloudFormation();
-  const cfTemplate = fs.readFileSync(__dirname + '/../cloudformation.yaml');
+  const cfTemplate = fs.readFileSync(__dirname + '/../src/cloudformation.yaml');
   const code = fs.readFileSync(__dirname + '/../src/index.js');
 
   return cf.createStack({
