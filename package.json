@@ -2,6 +2,7 @@
   "name": "aws-cfn-custom-resource-s3-empty-bucket",
   "version": "1.0.0",
   "description": "",
+  "main": "tasks/deploy.js",
   "scripts": {
     "deploy": "node ./tasks/deploy.js"
   },
