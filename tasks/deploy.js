@@ -1,5 +1,6 @@
 const AWS = require('aws-sdk');
-AWS.config.update({ region: 'eu-west-1' });
+
+AWS.config = new AWS.Config({ region: 'eu-west-1' });
 
 const fs = require('fs');
 const cf = new AWS.CloudFormation();
