@@ -6,10 +6,11 @@ const fs = require('fs');
 const cf = new AWS.CloudFormation();
 const cfTemplate = fs.readFileSync(__dirname + '/../lib/cloudformation.yaml');
 const code = fs.readFileSync(__dirname + '/../lib/S3EmptyBucket.js');
+const stackName = 'CFNCustomResource-S3EmptyBucket';
 
 console.log(`Creation of CloudFormation stack '${stackName}' started`);
 exports.default = cf.createStack({
-  StackName: 'CFNCustomResource-S3EmptyBucket',
+  StackName: stackName,
   TemplateBody: cfTemplate.toString(),
   Capabilities: ['CAPABILITY_IAM'],
   Parameters: [
@@ -24,8 +25,11 @@ exports.default = cf.createStack({
 .then(_ => console.log(`Creation of CloudFormation stack '${stackName}' finished`))
 .catch(_ => {
   if (_.code === 'AlreadyExistsException') {
+    console.log(`CloudFormation stack '${stackName}' already exists`);
+    console.log(`Update of CloudFormation stack '${stackName}' started`);
+    
     cf.updateStack({
-      StackName: 'CFNCustomResource-S3EmptyBucket',
+      StackName: stackName,
       TemplateBody: cfTemplate.toString(),
       Capabilities: ['CAPABILITY_IAM'],
       Parameters: [
