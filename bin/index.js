@@ -1,15 +1,18 @@
-exports.deploy = () => {
-  const AWS = require('aws-sdk');
+const AWS = require('aws-sdk');
+const fs = require('fs');
 
+const createWait = (cf, stackName, status) => () => cf.waitFor(status, {
+  StackName: stackName
+}).promise();
+
+exports.deploy = () => {
   AWS.config = new AWS.Config({ region: 'eu-west-1' });
 
-  const fs = require('fs');
   const cf = new AWS.CloudFormation();
   const cfTemplate = fs.readFileSync(__dirname + '/../lib/cloudformation.yaml');
   const code = fs.readFileSync(__dirname + '/../lib/S3EmptyBucket.js');
   const stackName = 'CFNCustomResource-S3EmptyBucket';
 
-  console.log(`Creation of CloudFormation stack '${stackName}' started`);
   return cf
     .createStack({
       StackName: stackName,
@@ -23,12 +26,9 @@ exports.deploy = () => {
       ],
     })
     .promise()
-    .then(_ => ({ stackName, pendingResourceState: 'stackCreateComplete' }))
+    .then(_ => ({ wait: createWait(cf, stackName, 'stackCreateComplete') }))
     .catch(_ => {
       if (_.code === 'AlreadyExistsException') {
-        console.log(`CloudFormation stack '${stackName}' already exists`);
-        console.log(`Update of CloudFormation stack '${stackName}' started`);
-
         return cf
           .updateStack({
             StackName: stackName,
@@ -42,12 +42,11 @@ exports.deploy = () => {
             ],
           })
           .promise()
-          .then(_ => ({ stackName, pendingResourceState: 'stackUpdateComplete' }))
+          .then(_ => ({ wait: createWait(cf, stackName, 'stackUpdateComplete') }))
           .catch(_ => {
             if (_.message.toLowerCase().indexOf('no updates') > -1) {
-              return { stackName, pendingResourceState: 'stackExists' };
+              return ({ wait: createWait(cf, stackName, 'stackExists') });
             }
-
             throw _;
           });
       } else {
